@@ -12,11 +12,18 @@ def open_accordant_config():
     '''
     调用配置文件
     '''
-    screen_size = _get_screen_size()
-    config_file = "{path}/config/{screen_size}/config.json".format(
-        path=sys.path[0],
-        screen_size=screen_size
-    )
+    config_file=""
+    rootDir=sys.path[0]
+    for lists in os.listdir(rootDir): 
+        path = os.path.join(rootDir, lists) 
+        if os.path.isfile(path) and path.endswith("config.json"):
+            config_file=path
+    if 0==len(config_file):    
+        screen_size = _get_screen_size()
+        config_file = "{path}/config/{screen_size}/config.json".format(
+            path=sys.path[0],
+            screen_size=screen_size
+        )
     if os.path.exists(config_file):
         with open(config_file, 'r') as f:
             print("Load config file from {}".format(config_file))

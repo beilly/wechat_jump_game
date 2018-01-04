@@ -106,6 +106,7 @@ def find_piece_and_board(im):
     piece_y_max = 0
     board_x = 0
     board_y = 0
+    piece_t = False
     scan_x_border = int(w / 8)  # 扫描棋子时的左右边界
     scan_start_y = 0  # 扫描的起始 y 坐标
     im_pixel = im.load()
@@ -133,7 +134,7 @@ def find_piece_and_board(im):
                 piece_y_max = max(i, piece_y_max)
 
     if not all((piece_x_sum, piece_x_c)):
-        return 0, 0, 0, 0
+        return 0, 0, 0, 0, False
     piece_x = int(piece_x_sum / piece_x_c)
     piece_y = piece_y_max - piece_base_height_1_2  # 上移棋子底盘高度的一半
 
@@ -180,12 +181,13 @@ def find_piece_and_board(im):
         pixel = im_pixel[board_x, l]
         if abs(pixel[0] - 245) + abs(pixel[1] - 245) + abs(pixel[2] - 245) == 0:
             board_y = l+10
+            piece_t = True
             break
 
     if not all((board_x, board_y)):
-        return 0, 0, 0, 0
+        return 0, 0, 0, 0, False
 
-    return piece_x, piece_y, board_x, board_y
+    return piece_x, piece_y, board_x, board_y, piece_t
 
 
 def check_screenshot():
@@ -239,7 +241,7 @@ def main():
         pull_screenshot()
         im = Image.open('./autojump.png')
         # 获取棋子和 board 的位置
-        piece_x, piece_y, board_x, board_y = find_piece_and_board(im)
+        piece_x, piece_y, board_x, board_y, piece_t = find_piece_and_board(im)
         ts = int(time.time())
         print(ts, piece_x, piece_y, board_x, board_y)
         set_button_position(im)
@@ -256,7 +258,11 @@ def main():
                 time.sleep(1)
             print('\n继续')
             i, next_rest, next_rest_time = 0, random.randrange(30, 100), random.randrange(10, 60)
-        time.sleep(random.uniform(0.9, 1.2))   # 为了保证截图的时候应落稳了，多延迟一会儿，随机值防 ban
+        sleep_time = random.uniform(0.9, 1.2)
+        if piece_t:
+            print('\n不是纯色块，多听一会')
+            sleep_time = random.uniform(2.0, 2.5)
+        time.sleep(sleep_time)   # 为了保证截图的时候应落稳了，多延迟一会儿，随机值防 ban
 
 
 if __name__ == '__main__':
